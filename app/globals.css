@@ -1,26 +1,8 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer components {
+  .input-field {
+    @apply flex-1 bg-transparent outline-none placeholder:text-neutral-400 border-0 focus:outline-none focus:border-none;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
