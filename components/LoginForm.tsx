@@ -10,23 +10,38 @@ import { useFormStatus } from 'react-dom';
 import { useActionState } from 'react';
 import { loginAction } from './actions';
 
-type LoginState = { ok: boolean; message: string | null };
+type LoginState = {
+  ok: boolean;
+  message: string | null;
+  email: string;
+  username: string;
+  password: string;
+  fieldErrors: {
+    email?: string;
+    username?: string;
+    password?: string;
+  };
+};
 
 const initialState: LoginState = {
   ok: false,
   message: null,
+  email: '',
+  username: '',
+  password: '',
+  fieldErrors: {},
 };
 
-function SubmitButton() {
+function SubmitButton({ locked }: { locked: boolean }) {
   const { pending } = useFormStatus();
 
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={pending || locked}
       className="mt-4 w-full rounded-full bg-neutral-900 py-3.5 text-sm font-medium text-white disabled:bg-neutral-300"
     >
-      {pending ? 'Logging in...' : 'Log in'}
+      {pending ? 'Loading...' : 'Login'}
     </button>
   );
 }
@@ -37,7 +52,8 @@ export default function LoginForm() {
     initialState
   );
 
-  const hasError = !!state.message && !state.ok;
+  const hasPasswordError = !!state.fieldErrors.password;
+  const isSuccess = state.ok && !!state.message;
 
   return (
     <div className="w-full max-w-md rounded-3xl bg-white shadow-xl px-10 py-12 space-y-10">
@@ -49,32 +65,48 @@ export default function LoginForm() {
 
       <form action={formAction} className="flex flex-col gap-4">
         {/* 이메일 */}
-        <div className="flex items-center gap-3 rounded-full border bg-white px-5 py-3 text-sm border-neutral-200">
-          <EnvelopeIcon className="h-6 w-6 text-gray-500" />
-          <input
-            name="email"
-            type="email"
-            className="input-field"
-            placeholder="Email"
-          />
+        <div className="space-y-1">
+          <div className="flex items-center gap-3 rounded-full border bg-white px-5 py-3 text-sm border-neutral-200">
+            <EnvelopeIcon className="h-6 w-6 text-gray-500" />
+            <input
+              name="email"
+              type="email"
+              className="input-field"
+              placeholder="Email"
+              defaultValue={state.email}
+            />
+          </div>
+          {state.fieldErrors.email && (
+            <p className="text-xs text-red-500 pl-4">
+              {state.fieldErrors.email}
+            </p>
+          )}
         </div>
 
         {/* 유저네임 */}
-        <div className="flex items-center gap-3 rounded-full border bg-white px-5 py-3 text-sm border-neutral-200">
-          <UserIcon className="h-6 w-6 text-gray-500" />
-          <input
-            name="username"
-            type="text"
-            className="input-field"
-            placeholder="Username"
-          />
+        <div className="space-y-1">
+          <div className="flex items-center gap-3 rounded-full border bg-white px-5 py-3 text-sm border-neutral-200">
+            <UserIcon className="h-6 w-6 text-gray-500" />
+            <input
+              name="username"
+              type="text"
+              className="input-field"
+              placeholder="Username"
+              defaultValue={state.username}
+            />
+          </div>
+          {state.fieldErrors.username && (
+            <p className="text-xs text-red-500 pl-4">
+              {state.fieldErrors.username}
+            </p>
+          )}
         </div>
 
         {/* 비밀번호 */}
         <div className="space-y-1">
           <div
             className={`flex items-center gap-3 rounded-full border bg-white px-5 py-3 text-sm ${
-              hasError
+              hasPasswordError
                 ? 'border-red-400 bg-red-50 ring-2 ring-red-200'
                 : 'border-neutral-200'
             }`}
@@ -87,19 +119,25 @@ export default function LoginForm() {
               placeholder="Password"
             />
           </div>
-
-          {state.message && (
-            <p
-              className={`text-xs pl-4 ${
-                state.ok ? 'text-green-500' : 'text-red-500'
-              }`}
-            >
-              {state.message}
+          {state.fieldErrors.password && (
+            <p className="text-xs text-red-500 pl-4">
+              {state.fieldErrors.password}
             </p>
           )}
         </div>
 
-        <SubmitButton />
+        {/* 폼 전체 성공/실패 메시지 */}
+        {state.message && (
+          <p
+            className={`text-xs pl-4 ${
+              isSuccess ? 'text-green-500' : 'text-red-500'
+            }`}
+          >
+            {state.message}
+          </p>
+        )}
+
+        <SubmitButton locked={state.ok} />
       </form>
     </div>
   );
